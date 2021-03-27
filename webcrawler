@@ -1,0 +1,37 @@
+#!/usr/bin/env python3
+
+#Webcrawler (Project 5)
+
+import sys
+import socket
+import html
+import html.parser
+import urllib.parse
+import xml
+
+user = 'dsilva.d'
+passw = 'UH6WMNJJPXNXH7QM'
+
+
+#IP = '129.10.116.53'
+IP = '129.10.111.142'
+PORT = 80
+
+sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+sock.connect((IP, PORT))
+
+
+SNAME = sock.getsockname()[1]
+print("[bound] " + str(SNAME))
+
+def HTTPpost():
+	pSend = "POST /accounts/login/ HTTP/1.1\nHost: http://webcrawler-site.ccs.neu.edu/\nusername=" + user + "&password=" + passw + "\n<CR><LF>"
+	print("SENDING: " + pSend)
+	sock.send(pSend.encode())
+	recieved = sock.recv(1000)
+	print(recieved.decode())
+#<input type="text" name="username" id="id_username">
+HTTPpost()
+
+
+#def HTTPget:
