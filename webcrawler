@@ -37,7 +37,7 @@ def HTTPget():
         
 	#Logging in
 	uspa = "username=" + user + "&password=" + passw + "\r\n\r\n"
-	pSend = "POST /accounts/login/?next=/fakebook/ HTTP/1.1\r\nHost: webcrawler-site.ccs.neu.edu\r\nConnection: keep-alive\r\nContent-Length: " + str(len(uspa)) + "\r\n" + uspa
+	pSend = "POST /accounts/login/?next=/fakebook/ HTTP/1.1\r\nHost: webcrawler-site.ccs.neu.edu\r\nAccept-Encoding: gzip\r\nContent-Type: application/x-www-form-urlencoded\r\nConnection: keep-alive\r\nContent-Length: " + str(len(uspa)) + "\r\n" + uspa
 	sock.sendall(pSend.encode())
 	print("SENDING: " + pSend)
 	recieved = sock.recv(8192)
