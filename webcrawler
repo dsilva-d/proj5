@@ -1,0 +1,83 @@
+#!/usr/bin/env python3
+
+#Webcrawler (Project 5)
+
+import sys
+import socket
+import html
+from html.parser import HTMLParser
+import urllib.parse
+import xml
+
+user = 'dsilva.d'
+passw = 'UH6WMNJJPXNXH7QM'
+
+
+IP = '129.10.111.142'
+#IP = 'webcrawler-site.ccs.neu.edu'
+PORT = 80
+
+COOKIE = 0
+
+sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+sock.connect((IP, PORT))
+
+#LOG IN PAGE: /accounts/login/?next=/fakebook/
+
+SNAME = sock.getsockname()[1]
+print("[bound] " + str(SNAME))
+
+class MyHTMLParser(HTMLParser):
+	def handle_starttag(self, tag, attrs):
+		#print("Encountered a start tag:", tag)
+		#print(attrs)
+		if (len(attrs) == 3 and attrs[1][1] == 'csrfmiddlewaretoken'):
+			print(attrs[2][1])
+			COOKIE = attrs[2][1]
+		#print(self.get_starttag_text())
+
+    	#def handle_endtag(self, tag):
+        #	print("Encountered an end tag :", tag)
+
+    	#def get_starttag_text(self,i
+
+	#def handle_data(self, data):
+	#	print("Encountered some data  :", data)
+
+def HTTPget():
+	#Reaching Log-in Page
+	pSend = "GET /accounts/login/ HTTP/1.1\r\nHost: webcrawler-site.ccs.neu.edu\r\n\r\n"
+	print("SENDING: " + pSend)
+	sock.sendall(pSend.encode())
+	recieved = sock.recv(8192)
+	phome = recieved.decode()
+
+
+	parser = MyHTMLParser()
+	parser.feed(phome)
+
+#	print("HERE")
+	#print(parser.get_starttag_text())
+
+#	print("DONE HERE")
+
+	print("\nLOG IN PAGE:\n" + phome)
+        
+	#Logging in
+#	uspa = "username=" + user + "&password=" + passw + "\r\n\r\n"
+#	pSend = "POST /accounts/login/?next=/fakebook/ HTTP/1.1\r\nHost: webcrawler-site.ccs.neu.edu\r\nAccept-Encoding: gzip\r\nContent-Type: application/x-www-form-urlencoded\r\nConnection: keep-alive\r\nContent-Length: " + str(len(uspa)) + "\r\n" + uspa
+#	sock.sendall(pSend.encode())
+#	print("SENDING: " + pSend)
+#	recieved = sock.recv(8192)
+#	phome = recieved.decode()
+#	print("\nRECV: " + phome)
+
+def HTTPpost():
+	pSend = "POST /accounts/login/ HTTP/1.1\r\nHost: webcrawler-site.ccs.neu.edu\r\n\r\nusername=" + user + "&password=" + passw + "&csrfmiddlewaretoken" + str(COOKIE)
+	print("SENDING: " + pSend)
+	sock.send(pSend.encode())
+	recieved = sock.recv(4096)
+	print("\nRECV: " + recieved.decode())
+#<input type="text" name="username" id="id_username">
+HTTPget()
+HTTPpost()
