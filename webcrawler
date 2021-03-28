@@ -6,7 +6,6 @@ import sys
 import socket
 import html
 from html.parser import HTMLParser
-=======
 import html.parser
 import urllib.parse
 import xml
@@ -19,10 +18,7 @@ IP = '129.10.111.142'
 #IP = 'webcrawler-site.ccs.neu.edu'
 PORT = 80
 
-<<<<<<< HEAD
 COOKIE = 0
-
-=======
 
 sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 sock.connect((IP, PORT))
@@ -48,7 +44,6 @@ class MyHTMLParser(HTMLParser):
 
 	#def handle_data(self, data):
 	#	print("Encountered some data  :", data)
-=======
 
 def HTTPget():
 	#Reaching Log-in Page
@@ -80,7 +75,6 @@ def HTTPget():
 
 def HTTPpost():
 	pSend = "POST /accounts/login/ HTTP/1.1\r\nHost: webcrawler-site.ccs.neu.edu\r\n\r\nusername=" + user + "&password=" + passw + "&csrfmiddlewaretoken" + str(COOKIE)
-=======
 	print("\nLOG IN PAGE:\n" + phome)
         
 	#Logging in
@@ -94,16 +88,11 @@ def HTTPpost():
 
 def HTTPpost():
 	pSend = "POST /accounts/login/ HTTP/1.1\nHost: http://webcrawler-site.ccs.neu.edu/\nusername=" + user + "&password=" + passw + "\n"
->>>>>>> 60c5d2f05e2131a4e906e4c72b678ba2454e6dfa
 	print("SENDING: " + pSend)
 	sock.send(pSend.encode())
 	recieved = sock.recv(4096)
 	print("\nRECV: " + recieved.decode())
 #<input type="text" name="username" id="id_username">
 HTTPget()
-<<<<<<< HEAD
 HTTPpost()
-=======
 
-
->>>>>>> 60c5d2f05e2131a4e906e4c72b678ba2454e6dfa
