@@ -5,11 +5,9 @@
 import sys
 import socket
 import html
-<<<<<<< HEAD
 from html.parser import HTMLParser
 =======
 import html.parser
->>>>>>> 60c5d2f05e2131a4e906e4c72b678ba2454e6dfa
 import urllib.parse
 import xml
 
@@ -25,7 +23,7 @@ PORT = 80
 COOKIE = 0
 
 =======
->>>>>>> 60c5d2f05e2131a4e906e4c72b678ba2454e6dfa
+
 sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 sock.connect((IP, PORT))
 
@@ -34,7 +32,6 @@ sock.connect((IP, PORT))
 SNAME = sock.getsockname()[1]
 print("[bound] " + str(SNAME))
 
-<<<<<<< HEAD
 class MyHTMLParser(HTMLParser):
 	def handle_starttag(self, tag, attrs):
 		#print("Encountered a start tag:", tag)
@@ -52,7 +49,6 @@ class MyHTMLParser(HTMLParser):
 	#def handle_data(self, data):
 	#	print("Encountered some data  :", data)
 =======
->>>>>>> 60c5d2f05e2131a4e906e4c72b678ba2454e6dfa
 
 def HTTPget():
 	#Reaching Log-in Page
@@ -61,7 +57,6 @@ def HTTPget():
 	sock.sendall(pSend.encode())
 	recieved = sock.recv(8192)
 	phome = recieved.decode()
-<<<<<<< HEAD
 
 
 	parser = MyHTMLParser()
