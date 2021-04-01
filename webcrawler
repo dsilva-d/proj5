@@ -18,6 +18,13 @@ IP = '129.10.111.142'
 PORT = 80
 csrfm = 0
 csrfc = 0
+sesid = 0
+
+#untracked = [] #storing unatracked URLs
+tracked = ['/','/fakebook/', '/accounts/logout/'] #list of all urls tracked
+sflags = [] #storing flags
+#track http://webcrawler-site.ccs.neu.edu
+
 
 sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 sock.connect((IP, PORT))
@@ -34,7 +41,7 @@ class MyHTMLParser(HTMLParser):
                 #print(attrs)
                 if (len(attrs) == 3 and attrs[1][1] == 'csrfmiddlewaretoken'):
                         csrfm = attrs[2][1]
-                        print('CSRF MIDDLE:\n' + str(csrfm))
+                        #print('CSRF MIDDLE:\n' + str(csrfm))
                 #print(self.get_starttag_text())
 
         #def handle_endtag(self, tag):
@@ -45,36 +52,97 @@ class MyHTMLParser(HTMLParser):
         #def handle_data(self, data):
         #       print("Encountered some data  :", data)
 
-def HTTPget():
+def HTTPget(path):
         global csrfc
         #Reaching Log-in Page
-        pSend = "GET /accounts/login/?next=/fakebook/ HTTP/1.1\r\nHost: webcrawler-site.ccs.neu.edu\r\n\r\n"
-        print("SENDING: " + pSend)
+        pSend = "GET " + path + "  HTTP/1.1\r\nHost: webcrawler-site.ccs.neu.edu\r\nCookie: csrftoken=" + csrfc + "; sessionid=" + str(sesid) + "\r\n\r\n"
+        #print("SENDING: " + pSend)
         sock.sendall(pSend.encode())
         recieved = sock.recv(8192)
         phome = recieved.decode()
-print('CSRF MIDDLE:\n' + str(csrfm))
+        #print('CSRF MIDDLE:\n' + str(csrfm))
         parser = MyHTMLParser()
         parser.feed(phome)
-        print('CSRF MIDDLE:\n' + str(csrfm))
-        indc = phome.index("csrftoken")
-        csrfc = phome[int(indc) + 10:int(indc) + 74]
-        print('CSRFC: ' + csrfc)
-        print("\nLOG IN PAGE:\n" + phome)
 
 
+        if "FLAG:" in phome:
+                indc = phome.index("<h2 class='secret_flag' style=\"color:red\">FLAG:")
+                print("FLAG FOUND")
+
+        #print('CSRF MIDDLE:\n' + str(csrfm))
+        #if (path == "/accounts/login/?next=/fakebook/"):
+#               indc = phome.index("csrftoken") + 10
+#               csrfc = phome[int(indc):int(indc) + 64]
+#               print('CSRFC: ' + csrfc) 
+        #print("\nPAGE:\n" + phome)
+        HTTPtrack(phome)
+
+
+def HTTPgetlogin():
+        global csrfc
+        #Reaching Log-in Page
+        pSend = "GET /accounts/login/?next=/fakebook/ HTTP/1.1\r\nHost: webcrawler-site.ccs.neu.edu\r\n\r\n"
+        #print("SENDING: " + pSend)
+        sock.sendall(pSend.encode())
+        recieved = sock.recv(8192)
+        phome = recieved.decode()
+        #print('CSRF MIDDLE:\n' + str(csrfm))
+        parser = MyHTMLParser()
+        parser.feed(phome)
+        #print('CSRF MIDDLE:\n' + str(csrfm))
+        indc = phome.index("csrftoken") + 10
+        csrfc = phome[int(indc):int(indc) + 64]
+        #print('CSRFC: ' + csrfc) 
+        #print("\nLOG IN PAGE:\n" + phome)
+        
 def HTTPpost():
-        HTTPget()
-#Host: webcrawler-site.ccs.neu.edu\r\n
+        global sesid
+        global csrfc
+        HTTPgetlogin()
+        #Host: webcrawler-site.ccs.neu.edu\r\n
         uspa = "username=" + user + "&password=" + passw + "&csrfmiddlewaretoken=" + str(csrfm) + "&next=%2Ffakebook%2F"
         pSend = "POST /accounts/login/ HTTP/1.1\r\nHost: webcrawler-site.ccs.neu.edu\r\nConnection: keep-alive\r\nContent-Type: application/x-www-form-urlencoded\r\nContent-Length: " + str(len(uspa)) + "\r\nOrigin: http://webcrawler-site.ccs.neu.edu\r\nCookie: __utmz=263563347.1599687173.1.1.utmcsr=(direct)|utmccn=(direct)|utmcmd=(none); _ga=GA1.2.1524445146.1599784910; __utma=263563347.1566582721.1599687173.1605577155.1606148119.16; csrftoken=" + str(csrfc) + "\r\n\r\n" + uspa + "\r\n\r\n"
-        print('POST:\n' + str(pSend))
+        #print('POST:\n' + str(pSend)) 
         #Logging in
         #pSend = "POST /accounts/login/?next=/fakebook/ HTTP/1.1\r\nHost: webcrawler-site.ccs.neu.edu\r\nAccept-Encoding: gzip\r\nContent-Type: application/x-www-form-urlencoded\r\nConnection: keep-alive\r\nContent-Length: " + str(len(uspa)) + "\r\n" + uspa
         #print("SENDING:\n" + psend)
         sock.sendall(pSend.encode())
         recieved = sock.recv(8192)
         phome = recieved.decode()
-        print("\nRECV: " + phome)
+        indc = phome.index("sessionid=") + 10
+        sesid = phome[indc:indc + 32]
+        indc = phome.index("csrftoken") + 10
+        csrfc = phome[indc:indc + 64]
+        #print("\nRECV: " + phome)
+        HTTPget("/fakebook/")
+
+def HTTPtrack(page):
+        untracked = []
+        tpage = page
+        #print(page)
+        while True:
+                if not "<a href=" in tpage:
+                        break
+
+                indc = tpage.index("<a href=") + 9
+                tpage = tpage[indc:]
+                indd = tpage.index(">")
+                prof = tpage[:indd - 1]
+                untracked.append(prof)
+        #       print('\n\n\n' + str(untracked) + '\n\n\n')
+                tpage = tpage[indd:]
+
+        HTTPcrawl(untracked)
+        
+def HTTPcrawl(untracked):
+        #print(str(untracked))
+        for url in untracked:
+                if not url in tracked:
+                        tracked.append(url)
+                        HTTPget(url)
+                        untracked.remove(url)
+        print("TRACKED" + str(tracked))
+#"<h2 class='secret_flag' style=\"color:red\">FLAG:"            
+
 
 HTTPpost()
